@@ -1,6 +1,7 @@
 package com.bradesco.minhasfinancas.api.controllers;
 
 import com.bradesco.minhasfinancas.api.dto.UsuarioDTO;
+import com.bradesco.minhasfinancas.exceptions.ErroAutenticacaoException;
 import com.bradesco.minhasfinancas.exceptions.RegraNegocioException;
 import com.bradesco.minhasfinancas.model.entity.Usuario;
 import com.bradesco.minhasfinancas.servicos.UsuarioService;
@@ -30,5 +31,16 @@ public class UsuarioController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
 
+    }
+
+    @PostMapping("/autenticar")
+    public ResponseEntity autenticar (@RequestBody UsuarioDTO dto){
+        try {
+            Usuario usuarioAutenticado = usuarioService.autenticar(dto.getEmail(), dto.getSenha());
+            return ResponseEntity.ok(usuarioAutenticado);
+
+        }catch (ErroAutenticacaoException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
