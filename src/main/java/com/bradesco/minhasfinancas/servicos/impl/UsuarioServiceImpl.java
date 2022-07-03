@@ -5,7 +5,6 @@ import com.bradesco.minhasfinancas.exceptions.RegraNegocioException;
 import com.bradesco.minhasfinancas.model.entity.Usuario;
 import com.bradesco.minhasfinancas.model.repository.UsuarioRepository;
 import com.bradesco.minhasfinancas.servicos.UsuarioService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -51,5 +50,10 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new RegraNegocioException("Já existe um usuário cadastrado com esse email");
         }
 
+    }
+
+    @Override
+    public Optional<Usuario> obterPorId(Long id) {
+        return usuarioRepository.findById(id);
     }
 }

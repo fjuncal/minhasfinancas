@@ -32,7 +32,7 @@ public class Lancamento {
     private Integer mes;
 
     @Column(name = "ano")
-    private String ano;
+    private Integer ano;
 
     @ManyToOne
     @JoinColumn(name = "id_usuario")
