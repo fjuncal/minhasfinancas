@@ -56,12 +56,16 @@ public class LancamentoServiceImpl implements LancamentoService {
     @Transactional(readOnly = true)
     public List<Lancamento> buscar(Lancamento lancamentoFiltro) {
         //forma de buscar com filtro ignorando o maiusculo e por ex: alguma letra que ele esteja procurando ele pega tudo que tem no banco com a letra
-        Example<Lancamento> example = Example.of(lancamentoFiltro,
+        Example example = Example.of(lancamentoFiltro,
                 ExampleMatcher.matching()
                         .withIgnoreCase()
-                        .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING));
+                        .withStringMatcher( ExampleMatcher.StringMatcher.EXACT) );
 
-        return repository.findAll(example);
+        List<Lancamento> all = repository.findAll(example);
+
+        return all;
+
+
     }
 
     @Override

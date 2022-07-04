@@ -7,6 +7,7 @@ import com.bradesco.minhasfinancas.model.entity.Lancamento;
 import com.bradesco.minhasfinancas.model.entity.Usuario;
 import com.bradesco.minhasfinancas.model.entity.enums.StatusLancamento;
 import com.bradesco.minhasfinancas.model.entity.enums.TipoLancamento;
+import com.bradesco.minhasfinancas.model.repository.LancamentoRepository;
 import com.bradesco.minhasfinancas.servicos.LancamentoService;
 import com.bradesco.minhasfinancas.servicos.UsuarioService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class LancamentoController {
 
     private final LancamentoService lancamentoService;
     private final UsuarioService usuarioService;
+    private final LancamentoRepository repository;
 
     @GetMapping
     public ResponseEntity buscar(@RequestParam(value = "descricao", required = false) String descricao, @RequestParam(value = "mes", required = false) Integer mes, @RequestParam(value = "ano", required = false) Integer ano, @RequestParam(value = "usuario") Long idUsuario) {
@@ -40,7 +42,13 @@ public class LancamentoController {
         }
 
         List<Lancamento> lancamentos = lancamentoService.buscar(lancamentoFiltro);
-        return ResponseEntity.ok(lancamentos);
+        List<Lancamento> byAno = repository.findByAno(lancamentoFiltro.getAno());
+        return ResponseEntity.ok(byAno);
+    }
+
+    @GetMapping("{id}")
+    public Optional<Lancamento> obterPorId(@PathVariable("id") Long id){
+        return repository.findById(id);
     }
 
 
@@ -60,7 +68,7 @@ public class LancamentoController {
     @PutMapping("{id}")
     public ResponseEntity atualizar(@PathVariable("id") Long id, @RequestBody LancamentoDTO dto) {
 
-        return lancamentoService.obterPorId(id).map(entity -> {
+        ResponseEntity<?> responseEntity = lancamentoService.obterPorId(id).map(entity -> {
             try {
                 Lancamento lancamento = converter(dto);
                 lancamento.setId(entity.getId());
@@ -70,6 +78,8 @@ public class LancamentoController {
                 return ResponseEntity.badRequest().body(e.getMessage());
             }
         }).orElseGet(() -> new ResponseEntity("Lançamento não encontrado na base de dados", HttpStatus.BAD_REQUEST));
+
+        return responseEntity;
     }
 
     @PutMapping("{id}/atualiza-status")
@@ -99,25 +109,41 @@ public class LancamentoController {
         }).orElseGet(() -> new ResponseEntity("Lancamento não encontrado na base de dados", HttpStatus.BAD_REQUEST));
     }
 
+    private LancamentoDTO converter(Lancamento lancamento) {
+        return LancamentoDTO.builder()
+                .id(lancamento.getId())
+                .descricao(lancamento.getDescricao())
+                .valor(lancamento.getValor())
+                .mes(lancamento.getMes())
+                .ano(lancamento.getAno())
+                .status(lancamento.getStatus().name())
+                .tipo(lancamento.getTipo().name())
+                .usuario(lancamento.getUsuario())
+                .build();
+    }
+
     private Lancamento converter(LancamentoDTO dto) {
         Lancamento lancamento = new Lancamento();
-        lancamento.setId(dto.getId());
+        if (dto.getId() != null){
+            lancamento.setId(dto.getId());
+        }
         lancamento.setDescricao(dto.getDescricao());
         lancamento.setAno(dto.getAno());
         lancamento.setMes(dto.getMes());
         lancamento.setValor(dto.getValor());
+        if (dto.getUsuario() != null){
+            Usuario usuario = usuarioService
+                    .obterPorId(dto.getUsuario().getId())
+                    .orElseThrow( () -> new RegraNegocioException("Usuário não encontrado para o Id informado.") );
+            lancamento.setUsuario(usuario);
+        }
 
-        Usuario usuario = usuarioService
-                .obterPorId(dto.getIdUsuario())
-                .orElseThrow(() -> new RegraNegocioException("Usuário não encontrado para o Id Informado"));
 
-        lancamento.setUsuario(usuario);
-
-        if (dto.getTipo() != null) {
+        if(dto.getTipo() != null) {
             lancamento.setTipo(TipoLancamento.valueOf(dto.getTipo()));
         }
 
-        if (dto.getStatus() != null) {
+        if(dto.getStatus() != null) {
             lancamento.setStatus(StatusLancamento.valueOf(dto.getStatus()));
         }
 

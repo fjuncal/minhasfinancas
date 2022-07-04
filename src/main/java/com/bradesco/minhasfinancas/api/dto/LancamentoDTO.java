@@ -1,5 +1,6 @@
 package com.bradesco.minhasfinancas.api.dto;
 
+import com.bradesco.minhasfinancas.model.entity.Usuario;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +17,7 @@ public class LancamentoDTO {
     private Integer mes;
     private Integer ano;
     private BigDecimal valor;
-    private Long idUsuario;
+    private Usuario usuario;
     private String tipo;
     private String status;
 }
