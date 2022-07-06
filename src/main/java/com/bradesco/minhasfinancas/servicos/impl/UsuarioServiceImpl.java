@@ -53,7 +53,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public Optional<Usuario> obterPorId(Long id) {
-        return usuarioRepository.findById(id);
+    public Optional<Usuario> obterPorId(Integer id) {
+        return usuarioRepository.findById(Long.valueOf(id));
     }
 }

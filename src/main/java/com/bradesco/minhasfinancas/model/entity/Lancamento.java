@@ -1,7 +1,6 @@
 package com.bradesco.minhasfinancas.model.entity;
 
 import com.bradesco.minhasfinancas.model.entity.enums.StatusLancamento;
-import com.bradesco.minhasfinancas.model.entity.enums.TipoLancamento;
 import lombok.*;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
@@ -18,6 +17,12 @@ import java.time.LocalDate;
 @ToString
 @Entity
 @Table(name = "lancamento", schema = "financas")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(
+        discriminatorType = DiscriminatorType.STRING,
+        name = "tipo",
+        columnDefinition = "VARCHAR(20)"
+)
 public class Lancamento {
 
     @Id
@@ -45,9 +50,9 @@ public class Lancamento {
     @Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
     private LocalDate dataCadastro;
 
-    @Column(name = "tipo")
-    @Enumerated(value = EnumType.STRING)
-    private TipoLancamento tipo;
+//    @Column(name = "tipo")
+//    @Enumerated(value = EnumType.STRING)
+//    private TipoLancamento tipo;
 
     @Column(name = "status")
     @Enumerated(value = EnumType.STRING)

@@ -3,8 +3,9 @@ package com.bradesco.minhasfinancas.servicos.impl;
 import com.bradesco.minhasfinancas.exceptions.RegraNegocioException;
 import com.bradesco.minhasfinancas.model.entity.Lancamento;
 import com.bradesco.minhasfinancas.model.entity.enums.StatusLancamento;
-import com.bradesco.minhasfinancas.model.entity.enums.TipoLancamento;
+import com.bradesco.minhasfinancas.model.repository.DespesaRepository;
 import com.bradesco.minhasfinancas.model.repository.LancamentoRepository;
+import com.bradesco.minhasfinancas.model.repository.ReceitaRepository;
 import com.bradesco.minhasfinancas.servicos.LancamentoService;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -22,8 +23,13 @@ public class LancamentoServiceImpl implements LancamentoService {
 
     private LancamentoRepository repository;
 
-    public LancamentoServiceImpl(LancamentoRepository lancamentoRepository) {
-        this.repository = lancamentoRepository;
+    private DespesaRepository despesaRepository;
+    private ReceitaRepository receitaRepository;
+
+    public LancamentoServiceImpl(LancamentoRepository repository, DespesaRepository despesaRepository, ReceitaRepository receitaRepository) {
+        this.repository = repository;
+        this.despesaRepository = despesaRepository;
+        this.receitaRepository = receitaRepository;
     }
 
     @Override
@@ -94,9 +100,6 @@ public class LancamentoServiceImpl implements LancamentoService {
         if (lancamento.getValor() == null || lancamento.getValor().compareTo(BigDecimal.ZERO) < 1) {
             throw new RegraNegocioException("Informe um valor válido");
         }
-        if (lancamento.getTipo() == null) {
-            throw new RegraNegocioException("Informe um tipo de lançamento");
-        }
     }
 
     @Override
@@ -108,8 +111,8 @@ public class LancamentoServiceImpl implements LancamentoService {
     @Transactional(readOnly = true)
     public BigDecimal obterSaldoPorUsuario(Long id) {
 
-        BigDecimal receitas = repository.obterSaldoPorTipoLancamentoEusuario(id, TipoLancamento.RECEITA);
-        BigDecimal despesas = repository.obterSaldoPorTipoLancamentoEusuario(id, TipoLancamento.DESPESA);
+        BigDecimal receitas = receitaRepository.obterSaldoPorTipoLancamentoEusuario(id);
+        BigDecimal despesas = despesaRepository.obterSaldoPorUsuario(id);
 
         if (receitas == null) {
             receitas = BigDecimal.ZERO;

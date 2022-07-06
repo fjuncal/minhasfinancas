@@ -6,7 +6,6 @@ import com.bradesco.minhasfinancas.exceptions.RegraNegocioException;
 import com.bradesco.minhasfinancas.model.entity.Lancamento;
 import com.bradesco.minhasfinancas.model.entity.Usuario;
 import com.bradesco.minhasfinancas.model.entity.enums.StatusLancamento;
-import com.bradesco.minhasfinancas.model.entity.enums.TipoLancamento;
 import com.bradesco.minhasfinancas.model.repository.LancamentoRepository;
 import com.bradesco.minhasfinancas.servicos.LancamentoService;
 import com.bradesco.minhasfinancas.servicos.UsuarioService;
@@ -34,7 +33,7 @@ public class LancamentoController {
         lancamentoFiltro.setMes(mes);
         lancamentoFiltro.setAno(ano);
 
-        Optional<Usuario> usuario = usuarioService.obterPorId(idUsuario);
+        Optional<Usuario> usuario = usuarioService.obterPorId(Math.toIntExact(idUsuario));
         if (!usuario.isPresent()) {
             return ResponseEntity.badRequest().body("Não foi possível realizar a consulta. Usuário não encontrado para o Id informado");
         } else {
@@ -117,8 +116,7 @@ public class LancamentoController {
                 .mes(lancamento.getMes())
                 .ano(lancamento.getAno())
                 .status(lancamento.getStatus().name())
-                .tipo(lancamento.getTipo().name())
-                .usuario(lancamento.getUsuario())
+                .usuario((int) lancamento.getUsuario().getId())
                 .build();
     }
 
@@ -133,14 +131,9 @@ public class LancamentoController {
         lancamento.setValor(dto.getValor());
         if (dto.getUsuario() != null){
             Usuario usuario = usuarioService
-                    .obterPorId(dto.getUsuario().getId())
+                    .obterPorId(dto.getUsuario())
                     .orElseThrow( () -> new RegraNegocioException("Usuário não encontrado para o Id informado.") );
             lancamento.setUsuario(usuario);
-        }
-
-
-        if(dto.getTipo() != null) {
-            lancamento.setTipo(TipoLancamento.valueOf(dto.getTipo()));
         }
 
         if(dto.getStatus() != null) {

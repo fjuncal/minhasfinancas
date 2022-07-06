@@ -49,7 +49,7 @@ public class UsuarioController {
 
     @GetMapping("{id}/saldo")
     public ResponseEntity obterSaldo(@PathVariable("id") Long id){
-        Optional<Usuario> usuario = usuarioService.obterPorId(id);
+        Optional<Usuario> usuario = usuarioService.obterPorId(Math.toIntExact(id));
 
         if (!usuario.isPresent()){
             return new ResponseEntity(HttpStatus.NOT_FOUND);
